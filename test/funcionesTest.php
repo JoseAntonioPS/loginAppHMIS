@@ -63,6 +63,76 @@ class funcionesTest extends PHPUnit_Framework_TestCase
 		//SI SE ENCUENTRA EL USUARIO ES QUE SE HA AGREGADO CORRECTAMENTE
 		$this->AssertTrue($aux->fetch() != false);
 	}
+
+	public function testModificarEmailUsuario(){
+		//DATOS DEL USUARIO + EMAILNUEVO
+
+		$username = "prueba";
+		$emailNuevo = base64_encode(openssl_random_pseudo_bytes(10));
+
+		//CAMBIAMOS EL EMAIL
+		$this->funcion->modificarEmailUsuario($this->conexion, $emailNuevo, $username);
+
+		//BUSCAMOS RESULTADOS CON EL NUEVO EMAIL
+		$aux = $this->conexion->prepare('SELECT * FROM users WHERE email = :email');
+		$aux->execute(array(
+			':email' => $emailNuevo,
+		));
+
+		//SI SE ENCUENTRA RESULTADOS ES QUE SE HA AGREGADO CORRECTAMENTE
+		$this->AssertTrue($aux->fetch() != false);
+	}
+
+	public function testComprobarPassword(){
+		//DATOS USUARIO Y PASSWORD
+		$username = 'prueba2';
+		$password = 'hola';
+
+		$aux = $this->funcion->comprobarPassword($this->conexion, $username, $password);
+		
+		//CONTRASEÑA CORRECTA
+		$this->AssertTrue($aux == '');
+
+		$password = 'incorrecta';
+		$aux = $this->funcion->comprobarPassword($this->conexion, $username, $password);
+		
+		//CONTRASEÑA INCORRECTA
+		$this->AssertTrue(!($aux == ''));
+	}
+
+	public function testPasswordIguales(){
+		//INTRODUCIMOS LOS PASSWORDS
+
+		$password1 = 'hola';
+		$password2 = 'hola';
+
+		$aux = $this->funcion->passwordIguales($password1,$password2);
+
+		//IGUALES
+		$this->AssertTrue($aux == '');
+
+		$password2 = 'adios';
+
+		$aux = $this->funcion->passwordIguales($password1,$password2);
+
+		//DISTINTAS
+		$this->AssertTrue(!($aux == ''));
+
+	}
+
+	public function testRecibirInfo(){
+	$username = 'prueba2';
+
+	//USUARIO EXISTENTE
+	$aux = $this->funcion->recibirInfor($this->conexion, $username)->fetch();
+	$this->AssertTrue($aux[1] == $username);
+
+	//USUARIO NO EXISTENTE
+	$username = 'qwertbvcxsder';
+	$aux = $this->funcion->recibirInfor($this->conexion, $username)->fetch();
+	$this->AssertTrue($aux == false);
+	}
+
 }
 
  ?>
